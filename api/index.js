@@ -21,38 +21,24 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 
 app.use(express.json());
 app.use(cookieParser());
-
-// Update CORS configuration
-const corsOptions = {
-  origin: ['https://nest-quest-pink.vercel.app', 'http://localhost:5173'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Allow-Headers',
-    'Access-Control-Allow-Origin',
-    'Access-Control-Allow-Credentials'
-  ],
-  exposedHeaders: ['Set-Cookie'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-};
-
-app.use(cors(corsOptions));
-
-// Add preflight handler for OPTIONS requests
-app.options('*', cors(corsOptions));
-
-// Add a middleware to set additional headers
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.set({
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "'Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token'",
+  });
+
   next();
 });
+
+const corsOptions = {
+  origin: "https://nest-quest-pink.vercel.app",
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
@@ -71,7 +57,7 @@ function getUserDataFromReq(req) {
       });
     }    
     app.get('/', (req, res) => {
-      res.send('NestQuest API is running');
+      res.send('Hello from Express backend on Vercel! This is a test!');
     });
     
 app.get('/api/test', (req, res) => {
@@ -197,17 +183,9 @@ app.get('/api/user-places', (req,res) => {
   });
 });
 
-app.get('/api/places/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const place = await Place.findById(id);
-    if (!place) {
-      return res.status(404).json({ error: 'Place not found' });
-    }
-    res.json(place);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch place' });
-  }
+app.get('/api/places/:id', async (req,res) => {
+  const {id} = req.params;
+  res.json(await Place.findById(id));
 });
 
 app.put('/api/places', async (req, res) => {
@@ -255,14 +233,9 @@ app.put('/api/places', async (req, res) => {
   }
 });
 
-app.get('/api/places', async (req, res) => {
-  try {
-    const places = await Place.find();
-    res.json(places);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch places' });
-  }
-});
+app.get('/api/places/', async (req,res) => {
+  res.json(await Place.find());
+})
 
 app.post('/api/bookings', async (req, res) => {
   try {
@@ -288,18 +261,5 @@ app.get('/api/bookings', async (req,res) => {
   res.json( await Booking.find({user:userData.id}).populate('place') );
 });
 
-// Add at the end of the file, before app.listen
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? err.message : undefined
-  });
-});
-
-// Update the listen call
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(4000);
 
