@@ -21,6 +21,16 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 
 app.use(express.json());
 app.use(cookieParser());
+app.use((req, res, next) => {
+  res.set({
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "*",
+      "Access-Control-Allow-Headers": "'Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token'",
+  });
+
+  next();
+});
+
 const corsOptions = {
   origin: "https://nest-quest-pink.vercel.app", // Update this to your frontend URL
   credentials: true, // Allow cookies to be sent with requests
