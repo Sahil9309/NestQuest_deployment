@@ -24,13 +24,9 @@ app.use(cookieParser());
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://nest-quest-pink.vercel.app',
-    'https://nest-quest-backend.vercel.app'
+    'https://nest-quest-pink.vercel.app'
   ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-  exposedHeaders: ['set-cookie']
+  credentials: true
 }));
 
 
@@ -56,47 +52,6 @@ function getUserDataFromReq(req) {
     
 app.get('/api/test', (req, res) => {
     res.json('test ok');
-});
-
-
-app.post('/api/bookings', async (req, res) => {
-  try {
-    const userData = await getUserDataFromReq(req);
-    if (!userData) {
-      console.warn('Unauthorized access attempt');
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const {
-      place,
-      checkIn,
-      checkOut,
-      numberOfPeople,
-      name,
-      phone,
-      price
-    } = req.body;
-
-    if (!place || !checkIn || !checkOut || !name || !phone || !price) {
-      return res.status(400).json({ error: 'Missing booking fields' });
-    }
-
-    const doc = await Booking.create({
-      place,
-      checkIn,
-      checkOut,
-      numberOfPeople,
-      name,
-      phone,
-      price,
-      user: userData.id
-    });
-
-    res.status(200).json(doc);
-  } catch (err) {
-    console.error('Booking error:', err);
-    res.status(500).json({ error: 'Failed to create booking', message: err.message });
-  }
 });
 
 app.post('/api/register', async (req,res) => {
@@ -272,7 +227,24 @@ app.get('/api/places/', async (req,res) => {
   res.json(await Place.find());
 })
 
-
+app.post('/api/bookings', async (req, res) => {
+  try {
+    const userData = await getUserDataFromReq(req);
+    if (!userData) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    
+    const {place,checkIn,checkOut,numberOfPeople,name,phone,price} = req.body;
+    const doc = await Booking.create({
+      place,checkIn,checkOut,numberOfPeople,name,phone,price,
+      user:userData.id,
+    });
+    res.status(200).json(doc);
+  } catch (err) {
+    console.error('Booking error:', err);
+    res.status(500).json({ error: 'Failed to create booking', message: err.message });
+  }
+});
 
 app.get('/api/bookings', async (req,res) => {
   const userData = await getUserDataFromReq(req);
