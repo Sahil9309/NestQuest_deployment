@@ -230,18 +230,21 @@ app.get('/api/places/', async (req,res) => {
 })
 
 app.post('/api/bookings', async (req, res) => {
-  const userData = await getUserDataFromReq(req);
-  const {
-    place,checkIn,checkOut,numberOfPeople,name,phone,price,
-  } = req.body;
-  Booking.create({
-    place,checkIn,checkOut,numberOfPeople,name,phone,price,
-    user:userData.id,
-  }).then((doc) => {
+  try {
+    const userData = await getUserDataFromReq(req);
+    const {
+      place,checkIn,checkOut,numberOfPeople,name,phone,price,
+    } = req.body;
+    
+    const doc = await Booking.create({
+      place,checkIn,checkOut,numberOfPeople,name,phone,price,
+      user:userData.id,
+    });
     res.json(doc);
-  }).catch((err) => {
-    throw err;
-  });
+  } catch (err) {
+    console.error('Booking error:', err);
+    res.status(500).json({ error: 'Failed to create booking' });
+  }
 });
 
 app.get('/api/bookings', async (req,res) => {
