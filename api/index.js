@@ -21,24 +21,17 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 
 app.use(express.json());
 app.use(cookieParser());
-app.use((req, res, next) => {
-  res.set({
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "*",
-      "Access-Control-Allow-Headers": "'Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token'",
-  });
 
-  next();
-});
-
+// Update CORS configuration
 const corsOptions = {
-  origin: "https://nest-quest-pink.vercel.app",
+  origin: ['https://nest-quest-pink.vercel.app', 'http://localhost:5173'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+  exposedHeaders: ['Set-Cookie']
 };
+
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
@@ -57,7 +50,7 @@ function getUserDataFromReq(req) {
       });
     }    
     app.get('/', (req, res) => {
-      res.send('Hello from Express backend on Vercel! This is a test!');
+      res.send('NestQuest API is running');
     });
     
 app.get('/api/test', (req, res) => {
@@ -183,9 +176,17 @@ app.get('/api/user-places', (req,res) => {
   });
 });
 
-app.get('/api/places/:id', async (req,res) => {
-  const {id} = req.params;
-  res.json(await Place.findById(id));
+app.get('/api/places/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const place = await Place.findById(id);
+    if (!place) {
+      return res.status(404).json({ error: 'Place not found' });
+    }
+    res.json(place);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch place' });
+  }
 });
 
 app.put('/api/places', async (req, res) => {
@@ -233,9 +234,14 @@ app.put('/api/places', async (req, res) => {
   }
 });
 
-app.get('/api/places/', async (req,res) => {
-  res.json(await Place.find());
-})
+app.get('/api/places', async (req, res) => {
+  try {
+    const places = await Place.find();
+    res.json(places);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch places' });
+  }
+});
 
 app.post('/api/bookings', async (req, res) => {
   try {
@@ -261,5 +267,18 @@ app.get('/api/bookings', async (req,res) => {
   res.json( await Booking.find({user:userData.id}).populate('place') );
 });
 
-app.listen(4000);
+// Add at the end of the file, before app.listen
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Update the listen call
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
