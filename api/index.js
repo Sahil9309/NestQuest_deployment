@@ -24,10 +24,12 @@ app.use(cookieParser());
 app.use(cors({
   credentials: true,
   origin: [
-    
     'https://nest-quest-pink.vercel.app',
     'http://localhost:5173'
-  ]
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['set-cookie']
 }));
 
 const mongoURI = process.env.MONGO_URI;
