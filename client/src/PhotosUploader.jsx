@@ -54,7 +54,7 @@ export default function PhotosUploader({addedPhotos,onChange}) {
                 <div key={link} className="h-32 flex relative">
                     <img
                         className="rounded-2xl w-full object-cover"
-                        src={link.startsWith('http') ? link : `http://localhost:4000/uploads/${link}`}
+                        src={link.startsWith('http') ? link : `https://nest-quest-backend.vercel.app/uploads/${link}`}
                         alt=""
                     />
                     <button onClick={ev => removePhoto(ev,link)} className='cursor-pointer absolute bottom-1 right-1 text-white bg-gray-900 bg-opacity-50 rounded-xl py-1 px-2'>
