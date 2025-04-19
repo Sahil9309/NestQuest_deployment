@@ -24,8 +24,9 @@ app.use(cookieParser());
 app.use(cors({
   credentials: true,
   origin: [
-    'http://localhost:5173',
-    'https://nest-quest-pink.vercel.app'
+    
+    'https://nest-quest-pink.vercel.app',
+    'http://localhost:5173'
   ]
 }));
 
