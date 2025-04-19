@@ -25,11 +25,13 @@ app.use(cors({
   credentials: true,
   origin: [
     'https://nest-quest-pink.vercel.app',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://nest-quest-backend.vercel.app'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['set-cookie']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
+  exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200
 }));
 
 const mongoURI = process.env.MONGO_URI;
@@ -232,18 +234,19 @@ app.get('/api/places/', async (req,res) => {
 app.post('/api/bookings', async (req, res) => {
   try {
     const userData = await getUserDataFromReq(req);
-    const {
-      place,checkIn,checkOut,numberOfPeople,name,phone,price,
-    } = req.body;
+    if (!userData) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
     
+    const {place,checkIn,checkOut,numberOfPeople,name,phone,price} = req.body;
     const doc = await Booking.create({
       place,checkIn,checkOut,numberOfPeople,name,phone,price,
       user:userData.id,
     });
-    res.json(doc);
+    res.status(200).json(doc);
   } catch (err) {
     console.error('Booking error:', err);
-    res.status(500).json({ error: 'Failed to create booking' });
+    res.status(500).json({ error: 'Failed to create booking', message: err.message });
   }
 });
 
