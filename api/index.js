@@ -22,17 +22,13 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  credentials: true,
   origin: [
-    'https://nest-quest-pink.vercel.app',
     'http://localhost:5173',
-    'https://nest-quest-backend.vercel.app'
+    'https://nest-quest-pink.vercel.app'
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
-  exposedHeaders: ['Set-Cookie'],
-  optionsSuccessStatus: 200
+  credentials: true
 }));
+
 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
@@ -235,20 +231,42 @@ app.post('/api/bookings', async (req, res) => {
   try {
     const userData = await getUserDataFromReq(req);
     if (!userData) {
+      console.warn('Unauthorized access attempt');
       return res.status(401).json({ error: 'Unauthorized' });
     }
-    
-    const {place,checkIn,checkOut,numberOfPeople,name,phone,price} = req.body;
+
+    const {
+      place,
+      checkIn,
+      checkOut,
+      numberOfPeople,
+      name,
+      phone,
+      price
+    } = req.body;
+
+    if (!place || !checkIn || !checkOut || !name || !phone || !price) {
+      return res.status(400).json({ error: 'Missing booking fields' });
+    }
+
     const doc = await Booking.create({
-      place,checkIn,checkOut,numberOfPeople,name,phone,price,
-      user:userData.id,
+      place,
+      checkIn,
+      checkOut,
+      numberOfPeople,
+      name,
+      phone,
+      price,
+      user: userData.id
     });
+
     res.status(200).json(doc);
   } catch (err) {
     console.error('Booking error:', err);
     res.status(500).json({ error: 'Failed to create booking', message: err.message });
   }
 });
+
 
 app.get('/api/bookings', async (req,res) => {
   const userData = await getUserDataFromReq(req);
