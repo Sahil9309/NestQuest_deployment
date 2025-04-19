@@ -43,7 +43,7 @@ function getUserDataFromReq(req) {
       });
     }    
     app.get('/', (req, res) => {
-      res.send('Hello from Express backend on Vercel! Love from sahil ❤️❤️❤️❤️❤️');
+      res.send('Hello from Express backend on Vercel! This is a test!');
     });
     
 app.get('/api/test', (req, res) => {
