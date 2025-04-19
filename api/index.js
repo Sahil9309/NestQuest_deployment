@@ -21,6 +21,8 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Replace the existing CORS configuration
 app.use(cors({
   credentials: true,
   origin: [
@@ -29,9 +31,9 @@ app.use(cors({
     'https://nest-quest-backend.vercel.app'
   ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Cookie'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   exposedHeaders: ['Set-Cookie'],
-  optionsSuccessStatus: 200
+  preflightContinue: true
 }));
 
 const mongoURI = process.env.MONGO_URI;
@@ -232,22 +234,18 @@ app.get('/api/places/', async (req,res) => {
 })
 
 app.post('/api/bookings', async (req, res) => {
-  try {
-    const userData = await getUserDataFromReq(req);
-    if (!userData) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-    
-    const {place,checkIn,checkOut,numberOfPeople,name,phone,price} = req.body;
-    const doc = await Booking.create({
-      place,checkIn,checkOut,numberOfPeople,name,phone,price,
-      user:userData.id,
-    });
-    res.status(200).json(doc);
-  } catch (err) {
-    console.error('Booking error:', err);
-    res.status(500).json({ error: 'Failed to create booking', message: err.message });
-  }
+  const userData = await getUserDataFromReq(req);
+  const {
+    place,checkIn,checkOut,numberOfPeople,name,phone,price,
+  } = req.body;
+  Booking.create({
+    place,checkIn,checkOut,numberOfPeople,name,phone,price,
+    user:userData.id,
+  }).then((doc) => {
+    res.json(doc);
+  }).catch((err) => {
+    throw err;
+  });
 });
 
 app.get('/api/bookings', async (req,res) => {
