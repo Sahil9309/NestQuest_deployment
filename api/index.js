@@ -32,13 +32,13 @@ app.use((req, res, next) => {
 });
 
 const corsOptions = {
-  origin: "https://nest-quest-pink.vercel.app", // Update this to your frontend URL
-  credentials: true, // Allow cookies to be sent with requests
-  methods: ['GET', 'POST','PUT','DELETE','PATCH'], // Add other methods if needed
+  origin: "https://nest-quest-pink.vercel.app",
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
-
+app.options('*', cors(corsOptions));
 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {
