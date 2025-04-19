@@ -43,6 +43,10 @@ function getUserDataFromReq(req) {
         });
       });
     }    
+    app.get('/', (req, res) => {
+      res.send('Hello from Express backend on Vercel!');
+    });
+    
 app.get('/api/test', (req, res) => {
     res.json('test ok');
 });
