@@ -21,18 +21,18 @@ const jwtSecret = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkw
 
 app.use(express.json());
 app.use(cookieParser());
+
+// Replace the existing cors configuration
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://nest-quest-pink.vercel.app',
-    'https://nest-quest-backend.vercel.app'
-  ],
   credentials: true,
+  origin: ['https://nest-quest-pink.vercel.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-  exposedHeaders: ['set-cookie']
+  exposedHeaders: ['Set-Cookie']
 }));
 
+// Add this line right after the cors configuration
+app.options('*', cors());
 
 const mongoURI = process.env.MONGO_URI;
 if (!mongoURI) {

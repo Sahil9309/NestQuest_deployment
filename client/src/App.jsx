@@ -13,8 +13,10 @@ import PlacePage from "./pages/PlacePage";
 import BookingsPage from "./pages/BookingsPage";
 import BookingPage from "./pages/BookingPage";
 
+// Update the axios configuration
 axios.defaults.baseURL = 'https://nest-quest-backend.vercel.app';
 axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Access-Control-Allow-Credentials'] = true;
 
 function App() {
   return (
